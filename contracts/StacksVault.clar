@@ -1,0 +1,64 @@
+;; Title:
+;; StacksVault - Decentralized Asset Management Protocol
+
+;; Summary
+;; A non-custodial, governance-driven fund management system built on Stacks L2, enabling secure Bitcoin-native DeFi operations through transparent proposal mechanisms and collective asset control.
+
+;; Description
+;; StacksVault revolutionizes decentralized finance on Bitcoin by leveraging Stacks Layer 2 capabilities for fast, low-cost transactions while maintaining Bitcoin-grade security through proof-of-transfer. This protocol enables:
+
+;; 1. Trustless Asset Management: Users retain custody while participating in pooled investment strategies
+;; 2. Governance-as-a-Service: DAO-style proposal system with weighted voting based on token holdings
+;; 3. Bitcoin Compliance: Native support for STX transactions with SIP-009 compatibility
+;; 4. Secure Execution: Time-locked withdrawals and multi-layer proposal validation
+;; 5. Transparent Accounting: On-chain audit trails for all fund movements
+
+;; Designed for institutional-grade DeFi operations, StacksVault implements:
+;; - Programmable treasury management
+;; - Multi-signature equivalent security through time delays
+;; - Anti-frontrunning mechanisms via block-height locking
+;; - Gas-optimized operations for L2 efficiency
+;; - Compliance-ready architecture for regulatory transparency
+
+;; Built using Clarity's provable smart contract language, StacksVault ensures:
+;; - Bitcoin-finalized transaction security
+;; - Predictable execution costs
+;; - Formal verification compatibility
+;; - No hidden attack vectors through static analysis
+
+;; Ideal for:
+;; - DAO treasuries
+;; - Bitcoin-native index funds
+;; - Grant distribution systems
+;; - Community investment pools
+
+;; Constants
+(define-constant contract-owner tx-sender)
+(define-constant err-owner-only (err u100))
+(define-constant err-not-initialized (err u101))
+(define-constant err-already-initialized (err u102))
+(define-constant err-insufficient-balance (err u103))
+(define-constant err-invalid-amount (err u104))
+(define-constant err-unauthorized (err u105))
+(define-constant err-proposal-not-found (err u106))
+(define-constant err-proposal-expired (err u107))
+(define-constant err-already-voted (err u108))
+(define-constant err-below-minimum (err u109))
+(define-constant err-locked-period (err u110))
+(define-constant err-transfer-failed (err u111))
+(define-constant err-invalid-duration (err u112))
+(define-constant err-zero-amount (err u113))
+(define-constant err-invalid-target (err u114))
+(define-constant err-invalid-description (err u115))
+(define-constant err-invalid-proposal-id (err u116))
+(define-constant err-invalid-vote (err u117))
+(define-constant minimum-duration u144) ;; minimum 1 day (assuming 10min blocks)
+(define-constant maximum-duration u20160) ;; maximum 14 days
+
+;; Data Variables
+(define-data-var total-supply uint u0)
+(define-data-var minimum-deposit uint u1000000) ;; in microSTX
+(define-data-var lock-period uint u1440) ;; ~10 days in blocks
+(define-data-var initialized bool false)
+(define-data-var last-rebalance uint u0)
+(define-data-var proposal-count uint u0)
