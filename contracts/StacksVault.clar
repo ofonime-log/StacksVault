@@ -139,3 +139,55 @@
         (ok true)
     )
 )
+
+;; Public Functions
+(define-public (initialize)
+    (begin
+        (asserts! (is-contract-owner) err-owner-only)
+        (asserts! (not (var-get initialized)) err-already-initialized)
+        (var-set initialized true)
+        (ok true)
+    )
+)
+
+(define-public (deposit (amount uint))
+    (begin
+        (try! (check-initialized))
+        (asserts! (>= amount (var-get minimum-deposit)) err-below-minimum)
+        (asserts! (> amount u0) err-zero-amount)
+
+        ;; Transfer STX to contract
+        (try! (stx-transfer? amount tx-sender (as-contract tx-sender)))
+        
+        ;; Update deposit records
+        (map-set deposits tx-sender {
+            amount: amount,
+            lock-until: (+ block-height (var-get lock-period)),
+            last-reward-block: block-height
+        })
+        
+        ;; Mint fund tokens
+        (mint-tokens tx-sender amount)
+    )
+)
+
+(define-public (withdraw (amount uint))
+    (begin
+        (try! (check-initialized))
+        (asserts! (> amount u0) err-zero-amount)
+
+        (let (
+            (deposit-info (unwrap! (map-get? deposits tx-sender) err-unauthorized))
+            (user-balance (unwrap! (get-balance tx-sender) err-unauthorized))
+        )
+            (asserts! (>= block-height (get lock-until deposit-info)) err-locked-period)
+            (asserts! (>= user-balance amount) err-insufficient-balance)
+            
+            ;; Burn tokens first
+            (try! (burn-tokens tx-sender amount))
+            
+            ;; Transfer STX back to user
+            (as-contract (stx-transfer? amount (as-contract tx-sender) tx-sender))
+        )
+    )
+)
